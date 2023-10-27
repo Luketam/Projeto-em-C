@@ -1,4 +1,4 @@
-<h1>Projeto de programação interativa e funcional</h1> <br>
+<h1>Projeto de programação interativa e funcional</h1>
 <h2>Jogo em C - Arcade de Disparos</h2> <br>
 
 <b>Grupo:</b> <br>
