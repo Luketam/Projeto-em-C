@@ -1,9 +1,11 @@
 # Projeto de programação interativa e funcional <br>
 ## Jogo em C - Arcade de Disparos <hr>
+
 Grupo:
-Júlia Veríssimo - jov@cesar.school
-Lucca da Veiga - lvg2@cesar.school
+Júlia Veríssimo - jov@cesar.school <br>
+Lucca da Veiga - lvg2@cesar.school <br>
 Ícaro Sampaio - isb2@cesar.school <br>
+
 Professores: 
-Pamela Bezerra;
+Pamela Bezerra; <br>
 Tiago Barros. <hr>
