@@ -1,104 +1,60 @@
-#include <ncurses.h>
-#include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
-//$ gcc ./src/*.c -I./include -o cli-lib-example ---pra baixar no linux---
-#define MAX_ENEMIES 10
+#include "timer.h"
+#include "screen.h"
+#include "keyboard.h"
 
-typedef struct {
-    int x, y;
-} Player;
-
-typedef struct {
-    int x, y;
-    int active;
-} Enemy;
-
-void drawPlayer(Player *player) {
-    mvprintw(player->y, player->x, "A");
-}
-
-void drawEnemy(Enemy *enemy) {
-    if (enemy->active) {
-        mvprintw(enemy->y, enemy->x, "X");
-    }
-}
-
-void moveEnemies(Enemy *enemies) {
-    for (int i = 0; i < MAX_ENEMIES; ++i) {
-        if (enemies[i].active) {
-            enemies[i].y++;
-            if (enemies[i].y >= LINES) {
-                enemies[i].active = 0;
-            }
-        }
-    }
-}
-
+// Função principal
 int main() {
-    initscr();
-    cbreak();
-    noecho();
-    curs_set(0);
-    keypad(stdscr, TRUE);
-    timeout(100);
+    screenInit(1); // Inicializa a tela com bordas
 
-    Player player = {COLS / 2, LINES - 1};
-    Enemy *enemies = malloc(MAX_ENEMIES * sizeof(Enemy));
+    int playerX = 20;
+    int isShot = 0;
+    int shotX, shotY;
 
-    for (int i = 0; i < MAX_ENEMIES; ++i) {
-        enemies[i].x = rand() % COLS;
-        enemies[i].y = 0;
-        enemies[i].active = 0;
-    }
+    keyboardInit(); // Inicializa a captura do teclado
 
-    int ch;
-    int score = 0;
+    timerInit(50); // Inicializa um temporizador de 50 milissegundos
 
-    while ((ch = getch()) != 'q') {
-        clear();
+    while (1) {
+        screenClear(); // Limpa a tela
 
-        switch (ch) {
-            case KEY_LEFT:
-                player.x--;
-                break;
-            case KEY_RIGHT:
-                player.x++;
-                break;
-            case ' ':
-                for (int i = 0; i < MAX_ENEMIES; ++i) {
-                    if (!enemies[i].active) {
-                        enemies[i].x = player.x;
-                        enemies[i].y = player.y - 1;
-                        enemies[i].active = 1;
-                        break;
-                    }
-                }
-                break;
-        }
+        printf("\033[%d;%dH^", 24, playerX); // Desenha a nave
 
-        moveEnemies(enemies);
-
-        drawPlayer(&player);
-        for (int i = 0; i < MAX_ENEMIES; ++i) {
-            drawEnemy(&enemies[i]);
-        }
-
-        // Check for collisions
-        for (int i = 0; i < MAX_ENEMIES; ++i) {
-            if (enemies[i].active && enemies[i].x == player.x && enemies[i].y == player.y) {
-                mvprintw(LINES / 2, COLS / 2 - 5, "Game Over!");
-                refresh();
-                getch(); // Wait for user input
-                endwin();
-                free(enemies);
-                return 0;
+        if (isShot) {
+            printf("\033[%d;%dH|", shotY, shotX); // Desenha o tiro
+            shotY--;
+            if (shotY <= 0) {
+                isShot = 0;
             }
         }
 
-        refresh();
+        screenUpdate(); // Atualiza a tela
+
+        usleep(50000); // Pausa para controlar a velocidade do jogo
+
+        if (keyhit()) {
+            char input = readch();
+            if (input == 'a' && playerX > 1) {
+                playerX--;
+            } else if (input == 'd' && playerX < 40) {
+                playerX++;
+            } else if (input == ' ' && !isShot) {
+                isShot = 1;
+                shotX = playerX;
+                shotY = 23;
+            }
+        }
+
+        if (timerTimeOver()) {
+            // Lógica de movimento dos inimigos ou outras atualizações do jogo a cada 50 ms
+            timerUpdateTimer(50); // Reinicia o temporizador
+        }
     }
 
-    endwin();
-    free(enemies);
+    screenDestroy(); // Restaura as configurações da tela
+    keyboardDestroy(); // Encerra a captura do teclado
+    timerDestroy(); // Encerra o temporizador
+
     return 0;
 }
