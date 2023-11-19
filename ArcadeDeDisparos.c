@@ -55,22 +55,22 @@ int Direcao=1; //1/positivo p direita, -1/negativo p esquerda
 int Score=0;
 
 void IniciarTirosInimigos(){
-  for (int i=0; i<MAX_TIROS_INIMIGOS; ++i){ 
-    TirosInimigos[i].Iniciado = 0;              
+  for (int i=0; i<MAX_TIROS_INIMIGOS; ++i){ // garante q os tiros dos inimigos estejam desativados
+    TirosInimigos[i].Iniciado = 0;              //até a inicialização destes
     TirosInimigos[i].x = -1;
     TirosInimigos[i].y = -1;
   }
 }
 void DesignTirosInimigos(){
-  for (int i=0; i<MAX_TIROS_INIMIGOS; ++i){
-    if (TirosInimigos[i].Iniciado){
+  for (int i=0; i<MAX_TIROS_INIMIGOS; ++i){  //percorre os tiros dos inimigos ativos e os desenha na tela (x, y)
+    if (TirosInimigos[i].Iniciado){              
       screenGotoxy(TirosInimigos[i].x, TirosInimigos[i].y);
       printf("\033[1;33m!\033m");
     }
   }
 }
 void PercursoTirosInimigos(){
-  for (int i=0; i<MAX_TIROS_INIMIGOS; ++i){
+  for (int i=0; i<MAX_TIROS_INIMIGOS; ++i){ //faz a animação dos tiros e desativa os q atingem a parte inferior da tela
     if (TirosInimigos[i].Iniciado){
       TirosInimigos[i].y += VEL_TIROS_INIMIGOS;
       if (TirosInimigos[i].y >= MAXY){
@@ -80,7 +80,7 @@ void PercursoTirosInimigos(){
   }
 }
 void TiroInimigo(){
-  for (int i = 0; i < MAX_INIMIGOS; ++i){
+  for (int i = 0; i < MAX_INIMIGOS; ++i){ // verifica os inimigos na tela e ativa os tiros q n estao em uso
     if (Inimigos[i].Iniciado){
       for (int j = 0; j < MAX_TIROS_INIMIGOS; ++j){
         if (!TirosInimigos[j].Iniciado){
@@ -127,16 +127,16 @@ void drawBorders(){ //funcao da biblioteca de tiaguinho
   printf("%c", BOX_DWNRIGHT);
   screenBoxDisable();
 }
-void DesignVidaJgdr(){
+void DesignVidaJgdr(){  //desenha na tela a vida do jgdr e a ajusta, conforme ele perde vida
   screenGotoxy(MINX + 1, MINY + 1);
   printf("  \033[1;34mVida: \033[m");
   for (int i=0; i<VidaJgdr; ++i) {
-    printf("\033[0;31m%s\033[m", CORACAO);
+    printf("\033[0;31m%s\033[m", CORACAO); //unicode
     printf(" ");
   }
 }
-void IniciarJogo(int Nivel){
-  InfoJG.Nivel = Nivel;
+void IniciarJogo(int Nivel){ //configura td p um novo nível, reposiciona os inimigos
+  InfoJG.Nivel = Nivel;                 //e reinicia as posições da nave e dos tiros
   InfoJG.TotalInimigos = MAX_INIMIGOS * (Nivel+1);
   Nave.x = (MAXX - LNAVE) / 2;
   Nave.y = MAXY - ANAVE - 1;
@@ -146,15 +146,15 @@ void IniciarJogo(int Nivel){
   }
   if (Nivel == 1){
     for (int i=0; i<MAX_INIMIGOS; ++i){
-      Inimigos[i].x = i * (LINIMIGO + 2) + 1;
-      Inimigos[i].y = 2;
+      Inimigos[i].x = i * (LINIMIGO + 2) + 1; //inimigos posicionados linearmente na parte superior da tela
+      Inimigos[i].y = 2; 
       Inimigos[i].Tipo = INIMIGO_1;
       Inimigos[i].Iniciado = 1;
     }
   }
   else if (Nivel == 2){
     for (int i=0; i<MAX_INIMIGOS; ++i){
-      Inimigos[i].x = i * (LINIMIGO + 4) + 1;
+      Inimigos[i].x = i * (LINIMIGO + 4) + 1; //inimigos posicionados com um espaçamento maior
       Inimigos[i].y = 2;
       Inimigos[i].Tipo = INIMIGO_2;
       Inimigos[i].Iniciado = 1;
@@ -163,7 +163,7 @@ void IniciarJogo(int Nivel){
   else if (Nivel == 3){
   for (int i=0; i<MAX_INIMIGOS-1; ++i){
     if (i % 2 == 0){
-      Inimigos[i].x = i * (LINIMIGO + 6) + 1;
+      Inimigos[i].x = i * (LINIMIGO + 6) + 1; //inimigos posicionados alternadamente nas laterais da tela
     } else{
       Inimigos[i].x = MAXX - ((i + 1) * (LINIMIGO + 6));
     }
@@ -183,8 +183,8 @@ void IniciarJogo(int Nivel){
     TirosInimigos[i].y = -1;
   }
 }
-int InimigosDerrotados(){
-  for (int i=0; i<MAX_INIMIGOS; ++i){
+int InimigosDerrotados(){ //percorre o array de inimigos e verifica se tem algum ativo (Inimigos[i].Iniciado)
+  for (int i=0; i<MAX_INIMIGOS; ++i){ //se encontrar, retorna 0, se nao, retorna 1
     if (Inimigos[i].Iniciado){
       return 0;
     }
@@ -193,20 +193,20 @@ int InimigosDerrotados(){
 }
 int IniciadoInimigos(){
   int count = 0;
-  for (int i=0; i<MAX_INIMIGOS; ++i){
+  for (int i=0; i<MAX_INIMIGOS; ++i){ //percorre o array de inimigos e restorna a quantidade deles que estao em campo
     if (Inimigos[i].Iniciado){
       count++;
     }
   }
   return count;
 }
-void DesignNave() {
+void DesignNave(){ //desenha na tela a nave do jgdr (x, y)
   screenGotoxy(Nave.x, Nave.y);
   printf("\033[1;34m⢀⡴⣿⢦⡀\033[m");
   DesignVidaJgdr();
 }
 void DesignInimigos(){
-  for (int i=0; i<MAX_INIMIGOS; ++i){
+  for (int i=0; i<MAX_INIMIGOS; ++i){ //desenha os inimigos, de acordo com seu tipo
     if (Inimigos[i].Iniciado){
       screenGotoxy(Inimigos[i].x, Inimigos[i].y);
       switch (Inimigos[i].Tipo){
@@ -223,7 +223,7 @@ void DesignInimigos(){
     }
   }
 }
-void DesignTiros(){
+void DesignTiros(){ //desenha os tiros do jgdr
   for (int i=0; i<MAX_TIROS; ++i){
     if (Tiros[i].Iniciado){
       screenGotoxy(Tiros[i].x, Tiros[i].y);
@@ -231,7 +231,7 @@ void DesignTiros(){
     }
   }
 }
-void PercursoNave(int Direcao){
+void PercursoNave(int Direcao){ //mantem a nave dentro dos limites da tela (movimentacao horizontal)
   Nave.x += Direcao;
   if (Nave.x < MINX){
     Nave.x = MINX;
@@ -239,18 +239,18 @@ void PercursoNave(int Direcao){
     Nave.x = MAXX - LNAVE;
   }
 }
-void PercursoInimigos(){
-  static int count = 0; // Variável estática para controlar o movimento horizontal
-  count++;
-  for (int i=0; i<MAX_INIMIGOS; ++i){
-    if (Inimigos[i].Iniciado){
-      Inimigos[i].x += Direcao;
-      if (count % 100 == 0){ 
+void PercursoInimigos(){ //movimentacao dos inimigos
+  static int count = 0; //usada para controlar o movimento horizontal
+  count++; //a cada chamada da função, o valor de count é incrementado
+  for (int i=0; i<MAX_INIMIGOS; ++i){ 
+    if (Inimigos[i].Iniciado){ //verifica se o inimigo está iniciado
+      Inimigos[i].x += Direcao; //move p esquerda ou direita
+      if (count % 10 == 0){ //sendo múltiplo de 10, se movem verticalmente
         Inimigos[i].y += Direcao;
       }
-      if (Inimigos[i].x + LINIMIGO >= MAXX || Inimigos[i].x <= MINX){
+      if (Inimigos[i].x + LINIMIGO >= MAXX || Inimigos[i].x <= MINX){ //verifica se algum inimigo atingiu as bordas horizontais da tela
         Direcao *= -1; // Inverte a direção horizontal
-        for (int j=0; j<MAX_INIMIGOS; ++j){ // Move todos os inimigos para baixo após a mudança de direção horizontal
+        for (int j=0; j<MAX_INIMIGOS; ++j){ // Move todos os inimigos para baixo após a inversao
           Inimigos[j].y += 1; // Movimento vertical após mudar de direção
         }
       }
@@ -260,9 +260,9 @@ void PercursoInimigos(){
 void PercursoTiros(){
   for (int i=0; i<MAX_TIROS; ++i){
     if (Tiros[i].Iniciado){
-      Tiros[i].y--;
-      if (Tiros[i].y <= MINY){
-        Tiros[i].Iniciado = 0;
+      Tiros[i].y--; //simula o movimento de subida
+      if (Tiros[i].y <= MINY){ //verifica se o tiro esta ativo na tela ou n
+        Tiros[i].Iniciado = 0; 
       }
     }
   }
@@ -270,24 +270,23 @@ void PercursoTiros(){
 void Colisoes(){
   for (int i=0; i<MAX_INIMIGOS; ++i){ // Verifica se as balas atingiram os inimigos
     if (Inimigos[i].Iniciado){
-      for (int j=0; j<MAX_TIROS; ++j){
+      for (int j=0; j<MAX_TIROS; ++j){ //verifica se a posicao dos tiros do jgdr e da nave inimiga coincidem
         if (Tiros[j].Iniciado && Tiros[j].y == Inimigos[i].y &&
             Tiros[j].x >= Inimigos[i].x &&
             Tiros[j].x <= Inimigos[i].x + LINIMIGO){
-          Inimigos[i].vida--;
-          Tiros[j].Iniciado = 0;
-          if (Inimigos[i].vida <= 0){
+          Inimigos[i].vida--; //Se um tiro atingir um inimigo, ele morre 
+          Tiros[j].Iniciado = 0; //seu tiro é desativado
+          if (Inimigos[i].vida <= 0){ //inimigo morto, ent é desativado
             Inimigos[i].Iniciado = 0;
-            Score += 100;
+            Score += 100; 
           }
         }
       }
     }
   }
   for (int i=0; i<MAX_TIROS; ++i){ // Verifica se as balas atingiram a nave do jogador
-    if (Tiros[i].Iniciado && Tiros[i].y == Nave.y && Tiros[i].x >= Nave.x &&
-        Tiros[i].x <= Nave.x + LNAVE){
-      Tiros[i].Iniciado = 0;
+    if (Tiros[i].Iniciado && Tiros[i].y == Nave.y && Tiros[i].x >= Nave.x && Tiros[i].x <= Nave.x + LNAVE){ //verifica se estao na msm coordenada
+      Tiros[i].Iniciado = 0; 
       VidaJgdr--; // Reduz a vida do jogador quando atingido
       if (VidaJgdr <= 0){
         printf("\033[1;31mGAME OVER\033[m");
@@ -296,15 +295,15 @@ void Colisoes(){
     }
   }
 }
-void Colisoes2(){
-  for (int i=0; i<MAX_TIROS_INIMIGOS; ++i){
-    if (TirosInimigos[i].Iniciado &&
-        TirosInimigos[i].y == Nave.y &&
+void Colisoes2(){ 
+  for (int i=0; i<MAX_TIROS_INIMIGOS; ++i){ //percorre os tiros ativos p ver se atingiram o jgdr
+    if (TirosInimigos[i].Iniciado && //tiro esta ativo?
+        TirosInimigos[i].y == Nave.y && //verifica as coordenadas
         TirosInimigos[i].x >= Nave.x &&
         TirosInimigos[i].x <= Nave.x + LNAVE){
-      VidaJgdr--;
+      VidaJgdr--; //se atingir, o jgdr perde vida
       TirosInimigos[i].Iniciado = 0;
-      if (VidaJgdr <= 0) {
+      if (VidaJgdr <= 0){ //jgdr morto
         screenClear();
         screenGotoxy(MAXX / 2 - 4, MAXY / 2);
         printf("\033[1;31mGAME OVER\033[m");
@@ -315,14 +314,14 @@ void Colisoes2(){
     }
   }
 }
-void Atirar(){
-  for (int i=0; i<MAX_TIROS; ++i){
-    if (!Tiros[i].Iniciado){
+void Atirar(){ 
+  for (int i=0; i<MAX_TIROS; ++i){ //percorre o array de tiros
+    if (!Tiros[i].Iniciado){ //Verifica se um tiro específico não está iniciado
       Tiros[i].Iniciado = 1;
-      Tiros[i].x = Nave.x + LNAVE / 2;
+      Tiros[i].x = Nave.x + LNAVE / 2; //posicao do tiro especifico
       Tiros[i].y = Nave.y - 1;
       break;
-    }
+    } //garante que so um tiro seja disparado por vez
   }
 }
 int main(){
@@ -394,10 +393,10 @@ int main(){
       }
       if (VidaJgdr <= 0){
         screenClear();
-        screenGotoxy(MAXX / 2 - 4, MAXY / 2); //essa função assegura que o cursor seja posicionado
-        screenUpdate();                       //entro dos limites da tela e, em seguida, utiliza sequências de escape
-        printf("\033[1;31mGAME OVER\033[m"); // ANSI para movê-lo para as coordenadas (x, y) fornecidas,
-        sleep(3);                            //permitindo assim o controle preciso da posição do cursor no terminal.
+        screenGotoxy(MAXX / 2 - 4, MAXY / 2); //assegura que o cursor esteja dentro da tela e utiliza as coordenadas
+        screenUpdate();                        //pra mexer o cursor corretamente
+        printf("\033[1;31mGAME OVER\033[m");  
+        sleep(3);                           
         ch = 'q'; // Termina o jogo após o game over
       }
     }
