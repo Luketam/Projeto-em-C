@@ -13,8 +13,8 @@ Tiago Barros. <br>
 <h2>Instruções de compilação:</h2>
 Clone o repositório do GitHub que contém
 o código ou exporte os arquivos dele, manualmente.
-Comando para clonar: “git clone
-https://github.com/Luketam/Projeto-em-C.git”
+
+Comando para clonar: “git clone https://github.com/Luketam/Projeto-em-C.git”
 
 Abra os arquivos na sua máquina e para compilar o
 código, por linha de comando, escreva "make" no terminal
