@@ -14,11 +14,11 @@ Tiago Barros. <br>
 Clone o repositório do GitHub que contém
 o código ou exporte os arquivos dele, manualmente.
 
-Comando para clonar: “git clone https://github.com/Luketam/Projeto-em-C.git”
+Comando para clonar: “ git clone https://github.com/Luketam/Projeto-em-C.git ”
 
 Abra os arquivos na sua máquina e para compilar o
-código, por linha de comando, escreva "make" no terminal
-do seu Linux ou Mac, e depois, “./programa”.
+código, por linha de comando, escreva " make " no terminal
+do seu Linux ou Mac, e depois, “ ./programa ”.
 
 OBS:
 
