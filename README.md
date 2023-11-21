@@ -1,11 +1,10 @@
 <h1>Projeto de programação interativa e funcional</h1>
 <h2>Jogo em C - Arcade de Disparos :flying_saucer: :milky_way:</h2> <br>
 
-<b>Grupo:</b> <br>
+<b>Grupo:</b> 2023.2- Turma A<br>
 Júlia Veríssimo - jov@cesar.school <br>
 Lucca da Veiga - lvg2@cesar.school <br>
 Ícaro Sampaio - isb2@cesar.school <br>
-2023.2- Turma A
 
 <b>Professores:</b> <br>
 Pamela Bezerra; <br>
