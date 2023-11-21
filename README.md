@@ -1,5 +1,5 @@
 <h1>Projeto de programação interativa e funcional</h1>
-<h2>Jogo em C - Arcade de Disparos</h2>:flying_saucer: :milky_way: <br>
+<h2>Jogo em C - Arcade de Disparos :flying_saucer: :milky_way:</h2> <br>
 
 <b>Grupo:</b> <br>
 Júlia Veríssimo - jov@cesar.school <br>
