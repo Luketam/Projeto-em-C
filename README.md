@@ -5,6 +5,7 @@
 Júlia Veríssimo - jov@cesar.school <br>
 Lucca da Veiga - lvg2@cesar.school <br>
 Ícaro Sampaio - isb2@cesar.school <br>
+2023.2- Turma A
 
 <b>Professores:</b> <br>
 Pamela Bezerra; <br>
