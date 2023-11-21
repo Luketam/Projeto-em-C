@@ -1,5 +1,5 @@
 <h1>Projeto de programação interativa e funcional</h1>
-<h2>Jogo em C - Arcade de Disparos</h2> <br>
+<h2>Jogo em C - Arcade de Disparos</h2>:flying_saucer: :milky_way: <br>
 
 <b>Grupo:</b> <br>
 Júlia Veríssimo - jov@cesar.school <br>
@@ -20,7 +20,7 @@ Abra os arquivos na sua máquina e para compilar o
 código, por linha de comando, escreva " make " no terminal
 do seu Linux ou Mac, e depois, “ ./programa ”.
 
-OBS:
+<b>OBS:</b>
 
 É necessário possuir um ambiente Linux ou MacOS para compilar o
 código, pois fizemos a utilização das bibliotecas CLI-LIB.
