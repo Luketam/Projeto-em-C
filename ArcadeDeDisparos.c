@@ -3,12 +3,13 @@
 #include "timer.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #define VEL_TIROS_INIMIGOS 1 //velocidade dos tiros
 #define INTERVALO_TIRO 100 //intervalo dos tiros em ms
 #define CORACAO "\u2764" //simbolo de coracao com unicode
-#define VIDA_INICIAL 5 //vida inicial do jgdr
+#define VIDA_INICIAL 3 //vida inicial do jgdr
 #define MAX_TIROS_INIMIGOS 20 //qnts tiros os inimigos tem no max
 #define LNAVE 5 //largura da nave
 #define ANAVE 1 //altura. usados p calcular colisoes
@@ -19,19 +20,27 @@
 #define MAX_INIMIGOS 5 //o max de inimigos
 #define LTIRO 1 //largura e altura dos tiros p colisoes
 #define ATIRO 1
-#define MAX_TIROS 10 //max de balas ativas do jgdr
+#define MAX_TIROS 6 //max de balas ativas do jgdr
 
-typedef enum{INIMIGO_1, INIMIGO_2, INIMIGO_3}TipoDeInimigo; //tipos de inimigos
+enum TipoInimigo {INIMIGO_UNICO};
+
+typedef struct Node {
+    char nome[4];
+    int pontos;
+    struct Node *next;
+} Node;
+
+Node *listaPontuacao = NULL;
 
 typedef struct{ //definicao das balas inimigas e suas coordenadas (x, y)
   int Iniciado; 
   int x, y;
 } TiroDosInimigos;
-typedef struct{ //definicao dos inimigos, suas vidas e coordenadas
-  int x, y;
-  int vida;
-  int Iniciado;
-  TipoDeInimigo Tipo;
+typedef struct { 
+    int x, y;
+    int vida;
+    int Iniciado;
+    enum TipoInimigo Tipo; // Adicionei o membro Tipo à estrutura Enemy
 } Enemy;
 typedef struct{ //balas do jgdr e suas coordenadas
   int Iniciado;
@@ -50,9 +59,85 @@ InfoDoJG InfoJG; //guarda info do jg
 Objeto Nave; //representa a nave do jgdr
 Enemy Inimigos[MAX_INIMIGOS]; //array com tam max do total de inimigos
 Bullet Tiros[MAX_TIROS]; //array com tam max do total de tiros
-int VidaJgdr=5;
+int VidaJgdr=3;
 int Direcao=1; //1/positivo p direita, -1/negativo p esquerda
 int Score=0;
+
+void adicionarPontuacao(char nome[4], int pontos) {
+    Node *novoNode = (Node *)malloc(sizeof(Node));
+    strcpy(novoNode->nome, nome);
+    novoNode->pontos = pontos;
+    novoNode->next = NULL;
+
+    if (listaPontuacao == NULL) {
+        listaPontuacao = novoNode;
+    } else {
+        Node *atual = listaPontuacao;
+        Node *anterior = NULL;
+
+        while (atual != NULL && pontos < atual->pontos) {
+            anterior = atual;
+            atual = atual->next;
+        }
+
+        if (anterior == NULL) {
+            novoNode->next = listaPontuacao;
+            listaPontuacao = novoNode;
+        } else {
+            anterior->next = novoNode;
+            novoNode->next = atual;
+        }
+    }
+}
+void mostrarRanking() {
+    printf("\nRanking:\n");
+
+    Node *atual = listaPontuacao;
+    int posicao = 1;
+
+    while (atual != NULL && posicao <= 3) {
+        printf("%d. %s - %d pontos\n", posicao, atual->nome, atual->pontos);
+        atual = atual->next;
+        posicao++;
+    }
+}
+void salvarPontuacaoEmArquivo() {
+    FILE *arquivo = fopen("pontuacao.dat", "wb");
+    if (arquivo == NULL) {
+        fprintf(stderr, "Erro ao abrir o arquivo para escrita.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    Node *atual = listaPontuacao;
+
+    while (atual != NULL) {
+        fwrite(atual, sizeof(Node), 1, arquivo);
+        atual = atual->next;
+    }
+
+    fclose(arquivo);
+}
+
+void carregarPontuacaoDoArquivo() {
+    FILE *arquivo = fopen("pontuacao.dat", "rb");
+    if (arquivo != NULL) {
+        Node buffer;
+
+        while (fread(&buffer, sizeof(Node), 1, arquivo) == 1) {
+            adicionarPontuacao(buffer.nome, buffer.pontos);
+        }
+
+        fclose(arquivo);
+    }
+}
+void liberarListaPontuacao() {
+    Node *atual = listaPontuacao;
+    while (atual != NULL) {
+        Node *proximo = atual->next;
+        free(atual);
+        atual = proximo;
+    }
+}
 
 void IniciarTirosInimigos(){
   for (int i=0; i<MAX_TIROS_INIMIGOS; ++i){ // garante q os tiros dos inimigos estejam desativados
@@ -135,49 +220,26 @@ void DesignVidaJgdr(){  //desenha na tela a vida do jgdr e a ajusta, conforme el
     printf(" ");
   }
 }
-void IniciarJogo(int Nivel){ //configura td p um novo nível, reposiciona os inimigos
-  InfoJG.Nivel = Nivel;                 //e reinicia as posições da nave e dos tiros
-  InfoJG.TotalInimigos = MAX_INIMIGOS * (Nivel+1);
+void IniciarJogo(int Nivel) {
+  InfoJG.Nivel = Nivel;
+  InfoJG.TotalInimigos = MAX_INIMIGOS * (Nivel + 1);
   Nave.x = (MAXX - LNAVE) / 2;
   Nave.y = MAXY - ANAVE - 1;
 
-  for (int i=0; i<MAX_INIMIGOS; ++i){
+  for (int i = 0; i < MAX_INIMIGOS; ++i) {
     Inimigos[i].Iniciado = 0; // Desativa todos os inimigos antes de reativar para o novo nível
   }
-  if (Nivel == 1){
-    for (int i=0; i<MAX_INIMIGOS; ++i){
-      Inimigos[i].x = i * (LINIMIGO + 2) + 1; //inimigos posicionados linearmente na parte superior da tela
-      Inimigos[i].y = 2; 
-      Inimigos[i].Tipo = INIMIGO_1;
-      Inimigos[i].Iniciado = 1;
-    }
-  }
-  else if (Nivel == 2){
-    for (int i=0; i<MAX_INIMIGOS; ++i){
-      Inimigos[i].x = i * (LINIMIGO + 4) + 1; //inimigos posicionados com um espaçamento maior
-      Inimigos[i].y = 2;
-      Inimigos[i].Tipo = INIMIGO_2;
-      Inimigos[i].Iniciado = 1;
-    }
-  }
-  else if (Nivel == 3){
-  for (int i=0; i<MAX_INIMIGOS-1; ++i){
-    if (i % 2 == 0){
-      Inimigos[i].x = i * (LINIMIGO + 6) + 1; //inimigos posicionados alternadamente nas laterais da tela
-    } else{
-      Inimigos[i].x = MAXX - ((i + 1) * (LINIMIGO + 6));
-    }
+  for (int i = 0; i < MAX_INIMIGOS; ++i) {
+    Inimigos[i].x = i * (LINIMIGO + 4) + 1; // Posicionamento linear dos inimigos
     Inimigos[i].y = 2;
-    Inimigos[i].Tipo = INIMIGO_3;
     Inimigos[i].Iniciado = 1;
   }
-}
-  for (int i=0; i<MAX_TIROS; ++i){
+  for (int i = 0; i < MAX_TIROS; ++i) {
     Tiros[i].Iniciado = 0;
     Tiros[i].x = -1;
     Tiros[i].y = -1;
   }
-  for (int i=0; i<MAX_TIROS_INIMIGOS; ++i){
+  for (int i = 0; i < MAX_TIROS_INIMIGOS; ++i) {
     TirosInimigos[i].Iniciado = 0;
     TirosInimigos[i].x = -1;
     TirosInimigos[i].y = -1;
@@ -205,23 +267,14 @@ void DesignNave(){ //desenha na tela a nave do jgdr (x, y)
   printf("\033[1;34m⢀⡴⣿⢦⡀\033[m");
   DesignVidaJgdr();
 }
-void DesignInimigos(){
-  for (int i=0; i<MAX_INIMIGOS; ++i){ //desenha os inimigos, de acordo com seu tipo
-    if (Inimigos[i].Iniciado){
-      screenGotoxy(Inimigos[i].x, Inimigos[i].y);
-      switch (Inimigos[i].Tipo){
-      case INIMIGO_1:
-        printf("\033[1;33m⢈⢝⠭⡫⡁\033[m");
-        break;
-      case INIMIGO_2:
-        printf("\033[1;33m⢘⠟⠛⠛⢟\033[m");
-        break;
-      case INIMIGO_3:
-        printf("\033[1;33m⢀⡴⣾⢿⡿⣷⢦⡀\033[m");
-        break;
-      }
+void DesignInimigos() {
+    for (int i = 0; i < MAX_INIMIGOS; ++i) {
+        if (Inimigos[i].Iniciado && Inimigos[i].Tipo == INIMIGO_UNICO) {
+            screenGotoxy(Inimigos[i].x, Inimigos[i].y);
+            printf("\033[1;33m⢈⢝⠭⡫⡁\033[m");
+            // Aqui você desenha o inimigo de acordo com suas coordenadas (Inimigos[i].x, Inimigos[i].y)
+        }
     }
-  }
 }
 void DesignTiros(){ //desenha os tiros do jgdr
   for (int i=0; i<MAX_TIROS; ++i){
@@ -231,8 +284,8 @@ void DesignTiros(){ //desenha os tiros do jgdr
     }
   }
 }
-void PercursoNave(int Direcao){ //mantem a nave dentro dos limites da tela (movimentacao horizontal)
-  Nave.x += Direcao;
+void PercursoNave(int movimento){ //mantem a nave dentro dos limites da tela (movimentacao horizontal)
+  Nave.x += movimento;
   if (Nave.x < MINX){
     Nave.x = MINX;
   } else if (Nave.x + LNAVE > MAXX){
@@ -324,88 +377,87 @@ void Atirar(){
     } //garante que so um tiro seja disparado por vez
   }
 }
-int main(){
-  screenInit(0); //inicializa  atela (cli-lib)
-  keyboardInit(); //inicializa o input do teclado (cli-lib)
-  timerInit(50); //temporizador de 50 ms (cli-lib)
+int main() {
+  screenInit(0);
+  keyboardInit();
+  timerInit(50);
   int Nivel = 1;
 
-  while (Nivel < 3){
-    IniciarJogo(Nivel); //inicia o nivel
-    IniciarTirosInimigos(); // inicia os tiros
-    VidaJgdr = VIDA_INICIAL; // Reinicia a vida
-    int ch = 0;
-    int TiroInimigoTimer = 0;
+  IniciarJogo(Nivel);
+  IniciarTirosInimigos();
+  VidaJgdr = VIDA_INICIAL;
+  int ch = 0;
+  int TiroInimigoTimer = 0;
+  int jogadorDigitouNome = 0; // Nova variável para verificar se o jogador já digitou seu nome
 
-    while (ch != 'q'){
-      if (IniciadoInimigos() == 0){
-        screenClear();
-        screenGotoxy(MAXX / 2 - 4, MAXY / 2);
-        printf("\033[1;32mNÍVEL %d COMPLETO\033[m", Nivel);
-        screenUpdate();
-        sleep(2);
-        if (Nivel < 3){
-          Nivel++;
-          IniciarJogo(Nivel);
-          IniciarTirosInimigos();
-          VidaJgdr = VIDA_INICIAL; // Reinicia a vida do jogador para o próximo nível
-        } else {
-          screenClear();
-          screenGotoxy(MAXX / 2 - 7, MAXY / 2);
-          printf("\033[1;32m           >Parabéns<\033[m");
-          screenGotoxy(MAXX / 2 - 9, MAXY / 2 + 1);
-          printf("\033[1;32m~ TODOS OS NÍVEIS ESTÃO COMPLETOS ~\033[m");
-          screenUpdate();
-          sleep(2);
-          ch = 'q'; // Termina o jogo após os níveis serem concluídos
-        }
-      } 
+  carregarPontuacaoDoArquivo(); // Carregar pontuações do arquivo antes de iniciar o jogo
+
+  while (ch != 'q' && !jogadorDigitouNome) { // Verifica se o jogador não digitou o nome ainda
       drawBorders();
-      if (timerTimeOver()){
-        PercursoInimigos();
-        PercursoTiros();
-        PercursoTirosInimigos();
-        Colisoes();
-        Colisoes2();
-        screenClear();
-        DesignNave();
-        DesignInimigos();
-        DesignTiros();
-        DesignTirosInimigos();
-        screenGotoxy(MAXX - 15, MINY + 1);
-        printf("\033[1;34mScore:\033[m \033[1;34m%d\033[m", Score);
-        screenUpdate();
-      }
-      TiroInimigoTimer++;
-      if (TiroInimigoTimer >= 1000){
-        TiroInimigo();
-        TiroInimigoTimer = 0;
-      }
-      if (keyhit()){ //cli-lib
-        ch = readch();
-        if (ch == ESQUERDA)
-          PercursoNave(-1);
-        else if (ch == DIREITA)
-          PercursoNave(1);
-        else if (ch == ' '){
-          Atirar();
+
+        if (timerTimeOver()) {
+            PercursoInimigos();
+            PercursoTiros();
+            PercursoTirosInimigos();
+            Colisoes();
+            Colisoes2();
+            screenClear();
+            DesignNave();
+            DesignTiros();
+            DesignInimigos();
+            DesignTirosInimigos();
+            screenGotoxy(MAXX - 15, MINY + 1);
+            printf("\033[1;34mScore:\033[m \033[1;34m%d\033[m", Score);
+            screenUpdate();
         }
-      }
-      if (VidaJgdr <= 0){
-        screenClear();
-        screenGotoxy(MAXX / 2 - 4, MAXY / 2); //assegura que o cursor esteja dentro da tela e utiliza as coordenadas
-        screenUpdate();                        //pra mexer o cursor corretamente
-        printf("\033[1;31mGAME OVER\033[m");  
-        sleep(3);                           
-        ch = 'q'; // Termina o jogo após o game over
-      }
+
+        if (InimigosDerrotados()) {
+            screenClear();
+            screenGotoxy(MAXX / 2 - 4, MAXY / 2);
+
+            char nome[4];
+            printf("\033[1;32mYOU WIN!\nDigite seu nome (3 caracteres): ");
+            scanf("%3s", nome);
+
+            adicionarPontuacao(nome, Score);
+            mostrarRanking();
+            salvarPontuacaoEmArquivo();
+
+            jogadorDigitouNome = 1; // Define que o jogador digitou o nome
+            screenUpdate();
+            sleep(3);
     }
-    if (ch=='q'){
-      break;
+
+        TiroInimigoTimer++;
+        if (TiroInimigoTimer >= 750) {
+            TiroInimigo();
+            TiroInimigoTimer = 0;
+        }
+
+        if (keyhit()) {
+            ch = readch();
+            if (ch == ESQUERDA)
+                PercursoNave(-1);
+            else if (ch == DIREITA)
+                PercursoNave(1);
+            else if (ch == ' ') {
+                Atirar();
+            }
+        }
+
+        if (VidaJgdr <= 0) {
+            screenClear();
+            screenGotoxy(MAXX / 2 - 4, MAXY / 2);
+            screenUpdate();
+            printf("\033[1;31mGAME OVER\033[m");
+            sleep(3);
+            ch = 'q';
+        }
     }
-  }
-  keyboardDestroy(); //funcoes da cli-lib de tiago - restaura as configuracoes do terminal apos termino do codigo
-  screenDestroy(); //restaura a parte grafica do terminal
-  timerDestroy(); //desativa o temporizador
+
+  liberarListaPontuacao(); // Liberar memória alocada para a lista de pontuações
+  keyboardDestroy();
+  screenDestroy();
+  timerDestroy();
   return 0;
 }
