@@ -20,6 +20,9 @@ Abra os arquivos na sua máquina e para compilar o
 código, por linha de comando, escreva " make " no terminal
 do seu Linux ou Mac, e depois, “ ./programa ”.
 
+O <b>Makefile</b> utilizado na compilação do código, através do VS Code, está disponível junto com os outros
+arquivos do código, aqui no repositório.
+
 <b>OBS:</b>
 
 É necessário possuir um ambiente Linux ou MacOS para compilar o
@@ -30,21 +33,4 @@ Para rodar o código no VS Code, que foi a plataforma que
 utilizamos e recomendamos, é necessária a utilização do WSL,
 que permite a criação de um sistema Linux. Ao conectar o WSL
 ao VS Code, o usuário poderá rodar o código no Ubuntu com os
-comandos citados.<hr>
-O <b>Makefile</b> utilizado na compilação do código, através do VS Code, foi:
-
-CC = gcc<br>
-CFLAGS = -Wall<br>
-SRC = $(wildcard *.c)<br>
-OBJ = $(SRC:.c=.o)<br>
-EXECUTABLE = programa<br>
-RUN = ./$(EXECUTABLE)<br>
-all: $(EXECUTABLE)<br>
-$(EXECUTABLE): $(OBJ)<br>
-  $(CC) $(CFLAGS) $^ -o $@<br>
-%.o: %.c<br>
-  $(CC) $(CFLAGS) -c $< -o $@<br>
-run: $(EXECUTABLE)<br>
-  $(RUN)<br>
-clean:<br>
-  rm -f $(OBJ) $(EXECUTABLE)<br>
+comandos citados.
