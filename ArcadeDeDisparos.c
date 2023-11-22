@@ -38,11 +38,11 @@ typedef struct{
     int vida;
     int Iniciado;
     enum TipoInimigo Tipo; 
-} Enemy;
+} NavesInimigas;
 typedef struct{ 
   int Iniciado;
   int x, y;
-} Bullet;
+} Tiro;
 typedef struct{ 
   int x, y;
 } Objeto;
@@ -55,8 +55,8 @@ Node *listaPontuacao = NULL;
 TiroDosInimigos TirosInimigos[MAX_TIROS_INIMIGOS];
 InfoDoJG InfoJG; 
 Objeto Nave; 
-Enemy Inimigos[MAX_INIMIGOS]; 
-Bullet Tiros[MAX_TIROS]; 
+NavesInimigas Inimigos[MAX_INIMIGOS]; 
+Tiro Tiros[MAX_TIROS]; 
 int VidaJgdr=3;
 int Direcao=1; 
 int Score=0;
@@ -377,12 +377,12 @@ int main(){
   IniciarJogo(Nivel);
   IniciarTirosInimigos();
   VidaJgdr = VIDA_INICIAL;
-  int ch = 0;
+  int letra = 0;
   int TiroInimigoTimer = 0;
   int jogadorDigitouNome = 0; 
 
   carregarPontuacaoDoArquivo();
-  while (ch != 'q' && !jogadorDigitouNome) { 
+  while (letra != 's' && !jogadorDigitouNome) { 
       drawBorders();
 
         if (timerTimeOver()) {
@@ -419,12 +419,12 @@ int main(){
             TiroInimigoTimer = 0;
         }
         if (keyhit()){
-            ch = readch();
-            if (ch == ESQUERDA)
+            letra = readch();
+            if (letra == ESQUERDA)
                 PercursoNave(-1);
-            else if (ch == DIREITA)
+            else if (letra == DIREITA)
                 PercursoNave(1);
-            else if (ch == ' ') {
+            else if (letra == ' ') {
                 Atirar();
             }
         }
@@ -434,7 +434,7 @@ int main(){
             screenUpdate();
             printf("\033[1;31mGAME OVER\033[m");
             sleep(3);
-            ch = 'q';
+            letra = 's';
         }
     }
   liberarListaPontuacao(); 
