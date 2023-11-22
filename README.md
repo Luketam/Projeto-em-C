@@ -30,4 +30,22 @@ Para rodar o código no VS Code, que foi a plataforma que
 utilizamos e recomendamos, é necessária a utilização do WSL,
 que permite a criação de um sistema Linux. Ao conectar o WSL
 ao VS Code, o usuário poderá rodar o código no Ubuntu com os
-comandos citados.
+comandos citados.<hr>
+O Makefile utilizado na compilação do código, através do VS Code, foi:
+CC = gcc<br>
+CFLAGS = -Wall<br>
+SRC = $(wildcard *.c)<br>
+OBJ = $(SRC:.c=.o)<br>
+EXECUTABLE = programa<br>
+RUN = ./$(EXECUTABLE)<br>
+all: $(EXECUTABLE)<br>
+$(EXECUTABLE): $(OBJ)<br>
+  $(CC) $(CFLAGS) $^ -o $@<br>
+%.o: %.c<br>
+  $(CC) $(CFLAGS) -c $< -o $@<br>
+run: $(EXECUTABLE)<br>
+  $(RUN)<br>
+clean:<br>
+  rm -f $(OBJ) $(EXECUTABLE)<br>
+
+  
